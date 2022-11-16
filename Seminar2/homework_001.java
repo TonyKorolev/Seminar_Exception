@@ -4,7 +4,7 @@ import java.util.Arrays;
 
 public class homework_001 {
     public static void main(String[] args) {
-        String[][] array = { { "3", "1", "2", "4", "5" }, { "a", "b", "c", "d", "a" }, { "e", "f", "g", "h", "45" } };
+        String[][] array = { { "3", "1", "2", "4", "0" }, { "a", "b", "c", "d", "a" }, { "e", "f", "g", "h", "45" } };
         System.out.println(Arrays.deepToString(array));
         int sum = sum2d(array);
         System.out.println(sum);
