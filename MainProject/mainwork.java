@@ -1,24 +1,73 @@
-import java.util.Scanner;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Scanner;
+import java.io.*;
 
 public class mainwork {
     public static void main(String[] args) {
+        Hello();
         String contact = CheckContact();
-        String[] ArrContact = contact.split(" ");
-        System.out.println(Arrays.toString(ArrContact));
-        try {
-            String[] ArrContact_Birthdate = CheckDateBirth(ArrContact);
-            System.out.println(Arrays.toString(ArrContact));
-            String[] ArrContact_Sex = CheckSex(ArrContact_Birthdate);
-            System.out.println(Arrays.toString(ArrContact));
-        } catch (Exception e) {
-            // TODO: handle exception
+        String[] arrContact = contact.split(" ");
+        System.out.println(Arrays.toString(arrContact));
+        // объявляю новый массив, куда буду записывать данные по требуемому порядку
+        String [] arrContactSort = new String[6];
+        boolean flagDateBirth = false;
+        boolean flagPhone = false;
+        boolean flagGender = false;
+        int indexDateBirth = 0;
+        int indexPhone = 0;
+        int indexGender = 0;
+        for (int i = 0; i < arrContact.length; i++) {
+            // проверка ввода и формата даты рождения
+            if (CheckDateBirth(arrContact[i]) == true) {
+                arrContactSort[3] = arrContact[i];
+                flagDateBirth = true;
+                indexDateBirth = i;
+            }
+            // проверка ввода номера телефона
+            if (CheckPhone(arrContact[i]) == true) {
+                arrContactSort[4] = arrContact[i];
+                flagPhone = true;
+                indexPhone = i;
+            }
+            // проверка ввода пола
+            if (CheckGender(arrContact[i]) == true) {
+                arrContactSort[5] = arrContact[i];
+                flagGender = true;
+                indexGender = i;
+            }
+        }
+        // выброс исключения по дате рождения
+        if (flagDateBirth == false) {
+            throw new BirthDateException("Wrong format birth date!");
+        }
+        // выброс исключения по телефону
+        if (flagPhone == false) {
+            throw new PhoneExcepton("No phone number!");
+        }
+        // выброс исключения по полу
+        if (flagGender == false) {
+            throw new GenderExcepton ("No gender!");
         }
         
+        // проверка на ввод ФИО и далее сортировка по требуемому порядку
+        boolean isFullname = CheckFullName(arrContact, indexDateBirth, indexPhone, indexGender);
+        if (isFullname == false) {
+            throw new FullNameExcepton ("Full name is not entered!");
+        } else {
+            String[] arrContactMain = SortFullName(arrContact, arrContactSort, indexDateBirth, indexPhone, indexGender);
+            System.out.println(Arrays.toString(arrContactMain));
+        }
     }
 
+    // приветствие
+    public static void Hello() {
+            System.out.println("Hello! Enter your full name," + 
+            " birth date, phone number and sex in any order.\n" + 
+            "Example 1: Ivanov Ivan Ivanivoch 21.10.1980 79179857635 m\n" +
+            "Example 2: f 28.08.1992 Alekseeva Marina Petrovna 79196665544");
+    }
+
+    // проверка на количество введенных данных
     public static String CheckContact() {
         Scanner sc = new Scanner(System.in);
         String contact = sc.nextLine();
@@ -42,59 +91,104 @@ public class mainwork {
         return count;
     }
 
-    //  Метод проверяет, выбран ли пол, если выбран, то сортирует его на последнее место
-    //  В случае отсутствия пола бросается исключение
-    public static String[] CheckSex(String[] arr) throws Exception {
-        boolean flag = false;
-        String var_str;
-        for (int i = 0; i < arr.length; i++) {
-            if (arr[i] == "m" | arr[i] == "f") {
-                // условие, если пол находится не на последнем месте, согласну формату
-                if (i != arr.length -1) {
-                    var_str = arr[i];
-                    arr[i] = arr[arr.length - 1];
-                    arr[arr.length - 1] = var_str;
-                }
-                flag = true;
-            }
-        }
-        if (flag == false) {
-            throw new Exception("You didn't enter sex! Please enter 'm' or 'f' for choise sex!");
-        }
-        return arr;
-    }
-
-    // сортировка массива при наличии в массиве даты рождения корректного формата
-    public static String[] CheckDateBirth (String[] arr) throws Exception {
-        boolean flag = false;
-        String var_str;
-        for (int i = 0; i < arr.length; i++) {
-            if (ItIsDate(arr[i]) == true) {
-                var_str = arr[i];
-                arr[i] = arr[1];
-                arr[1] = var_str;
-                flag = true;
-            }
-        }
-        if (flag == false) {
-            throw new Exception ("Wrong format birth date!");
-        }
-        return arr;
-    }
-
     // проверка строки на соответствие формату даты рождения
-    public static boolean ItIsDate (String str) {
-        boolean flag = true;
-        if (!str.matches("(0?[1-9]|[12][0-9]|3[01]).(0?[1-9]|1[012]).((19|20)\\d\\d)"))
-            return flag = false;
-        return flag;
+    public static boolean CheckDateBirth (String str) {
+        boolean ItIsBirthDate = false;
+        if (str.matches("(0?[1-9]|[12][0-9]|3[01]).(0?[1-9]|1[012]).((19|20)\\d\\d)")) {
+            ItIsBirthDate = true;
+        }
+        return ItIsBirthDate;
     }
 
-    public static String[] CheckPhone (String[] arr) {
-        
+    //  Метод проверяет, введен ли пол
+    public static boolean CheckGender(String str) {
+        boolean ItIsSex = false;
+        if ((str.equals("m")) | (str.equals("f"))) {
+            ItIsSex = true;
+            }
+        return ItIsSex;
     }
 
-    public static void name() {
-        
+    // проверка строки на соответствие номеру телефона
+    public static boolean CheckPhone (String str) {
+        boolean ItIsPhone = true;
+        for (int i = 0; i < str.length(); i++) {
+            if (!Character.isDigit(str.charAt(i))) {
+                ItIsPhone = false;
+            }
+        }
+        return ItIsPhone;
+    }
+
+    // проверка на ввод ФИО
+    public static boolean CheckFullName(String[] arr, 
+        int indexDateBirth, int indexPhone, int indexGender) {
+        boolean ItIsFullName = false;
+        for (int i = 2; i < arr.length; i++) {
+            if ((i != indexDateBirth) & (i != indexPhone) & (i != indexGender) & (i != 0) & 
+                (arr[i].matches("^[a-zA-Z]*$")) & (arr[i-1].matches("^[a-zA-Z]*$")) &
+                (arr[i-2].matches("^[a-zA-Z]*$"))) {
+                ItIsFullName = true;
+            }
+        }
+        return ItIsFullName;
+    }
+
+    // Запись ФИО на 0-2 места массива
+    public static String[] SortFullName (String[] arr, String[] arrSort, 
+        int indexDateBirth, int indexPhone, int indexGender) {
+        for (int i = 2; i < arr.length; i++) {
+            if ((i != indexDateBirth) & (i != indexPhone) & (i != indexGender) & (i != 0) & 
+                (arr[i].matches("^[a-zA-Z]*$")) & (arr[i-1].matches("^[a-zA-Z]*$")) &
+                (arr[i-2].matches("^[a-zA-Z]*$"))) {
+                arrSort[0] = arr[i-2];
+                arrSort[1] = arr[i-1];
+                arrSort[2] = arr[i];
+            }
+        }
+        return arrSort;
+    }
+
+    public static class BirthDateException extends RuntimeException {
+
+        public BirthDateException(String message) {
+            super(message);
+        }
+    }
+
+    public static class PhoneExcepton extends RuntimeException {
+        public PhoneExcepton(String message) {
+            super(message);
+        }
+    }
+
+    public static class GenderExcepton extends RuntimeException {
+        public GenderExcepton(String message) {
+            super(message);
+        }
+    }
+
+    public static class FullNameExcepton extends RuntimeException {
+        public FullNameExcepton(String message) {
+            super(message);
+        }
+    }
+
+    public static void WriteFileContact(String[] arr) {
+        String nameFile = arr[0];
+        try(FileWriter writer = new FileWriter(nameFile + ".txt", true))
+        {
+           // запись всей строки
+            for (int i = 0; i < arr.length; i++) {
+                if (i != arr.length-1) {
+                    writer.write(arr[i] + " ");
+                } else {
+                    writer.write(arr[i] + "\n");
+                }
+            }
+            writer.flush();
+        }
+        catch(IOException ex){
+        }
     }
 }
