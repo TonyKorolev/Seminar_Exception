@@ -175,6 +175,7 @@ public class mainwork {
         }
     }
 
+    // метод записи контакта в файл
     public static void WriteFileContact(String[] arr) {
         String nameFile = arr[0];
         try(FileWriter writer = new FileWriter(nameFile + ".txt", true))
