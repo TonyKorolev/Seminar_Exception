@@ -56,6 +56,7 @@ public class mainwork {
         } else {
             String[] arrContactMain = SortFullName(arrContact, arrContactSort, indexDateBirth, indexPhone, indexGender);
             System.out.println(Arrays.toString(arrContactMain));
+            WriteFileContact(arrContactMain);
         }
     }
 
